@@ -30,6 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   sqflite: any
   path_provider: '>=0.3.0'
+  intl: ^0.17.0
 
 
 dev_dependencies:
@@ -78,15 +79,15 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-  fonts:
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Roboto-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Roboto-Thin.ttf
-          weight: 100
+  # fonts:
+  #   - family: Roboto
+  #     fonts:
+  #       - asset: assets/fonts/Roboto-Light.ttf
+  #         weight: 300
+  #       - asset: assets/fonts/Roboto-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Roboto-Thin.ttf
+  #         weight: 100
 
   #
   # For details regarding fonts from package dependencies,

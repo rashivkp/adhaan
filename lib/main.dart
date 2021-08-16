@@ -8,133 +8,131 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(AdhaanApp());
 }
 
-class AdhaanApp extends StatefulWidget {
+class AdhaanApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Adhaan Vengara',
+        theme: ThemeData(fontFamily: 'Roboto'),
+        home: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.blueGrey,
+            title: const Text("Adhaan Vengara"),
+          ),
+          body: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/mosque.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: HomePage(),
+          ),
+        ));
+  }
+}
+
+class HomePage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _AdhaanAppState();
 }
 
-class _AdhaanAppState extends State<AdhaanApp> {
+class _AdhaanAppState extends State<HomePage> {
+  static const String dateFormat = 'd MMM y, EEEE';
+  DateTime? date = DateTime.now();
+  Adhaan? adhaan;
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Welcome to Flutter',
-      theme: ThemeData(fontFamily: 'Roboto'),
-      home: Scaffold(
-          appBar: AppBar(
-            title: const Text("Adhaan Vengara"),
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        width: double.infinity,
+        child: FutureBuilder<Adhaan?>(
+            future: DatabaseHelper.instance.getAdhaanTimings(date!),
+            builder: (BuildContext context, AsyncSnapshot<Adhaan?> snapshot) {
+              return getAdhaanFutureBuilder(context, snapshot);
+            }));
+  }
+
+  adhaanText(String text) {
+    return Text(text, style: TextStyle(color: Colors.white70, fontSize: 16));
+  }
+
+  adhanEntry(String title, String time) {
+    return Padding(
+        padding: EdgeInsets.all(5.0),
+        child: ListTile(
+          tileColor: Colors.white30,
+          leading: Icon(Icons.access_time, color: Colors.white54),
+          title: adhaanText(title),
+          subtitle: adhaanText(time),
+        ));
+  }
+
+  Widget adhaanDatePicker(BuildContext context) {
+    return TextButton(
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.all(16.0),
+          primary: Colors.white70,
+          textStyle: const TextStyle(fontSize: 20),
+        ),
+        onPressed: () async {
+          var newDate = await showDatePicker(
+              context: context,
+              initialDate: date!,
+              firstDate: DateTime(2021),
+              lastDate: DateTime(2022));
+          if (newDate != null) {
+            setState(() {
+              date = newDate;
+            });
+          }
+        },
+        child: Row(children: [
+          Icon(Icons.today, color: Colors.white70),
+          Text("  " + DateFormat(dateFormat).format(date!).toString()),
+        ]));
+  }
+
+  Widget getAdhaanFutureBuilder(
+      BuildContext context, AsyncSnapshot<Adhaan?> snapshot) {
+    if (!snapshot.hasData) {
+      return adhaanDatePicker(context);
+    }
+
+    adhaan = snapshot.data!;
+    // return Text(adhaan.zuhr);
+    return SingleChildScrollView(
+        child: Column(
+      children: <Widget>[
+        adhaanDatePicker(context),
+        Card(
+          clipBehavior: Clip.hardEdge,
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              adhanEntry("Subh", "${adhaan!.subh} AM"),
+              adhanEntry("Fajr", "${adhaan!.dawn} AM"),
+              adhanEntry("Dhuhr", "${adhaan!.zuhr} PM"),
+              adhanEntry("Asr", "${adhaan!.asr} PM"),
+              adhanEntry("Maghrib", "${adhaan!.magrib} PM"),
+              adhanEntry("Isha", "${adhaan!.isha} PM"),
+            ],
           ),
-          body: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 64),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/mosque.jpg"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: FutureBuilder<Adhaan?>(
-                  future: DatabaseHelper.instance.getAdhaanTimings(),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<Adhaan?> snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(child: Text("No data"));
-                    }
-                    var adhaan = snapshot.data!;
-                    return Center(
-                        child: ListView(
-                      children: [
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                                child: Text(adhaan.date,
-                                    style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18))),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(padding: EdgeInsets.all(40.0)),
-                            Expanded(
-                                child: Text('Subh',
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(fontSize: 18))),
-                            Expanded(
-                                child: Text(adhaan.subh,
-                                    style: const TextStyle(fontSize: 18))),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(padding: EdgeInsets.all(40.0)),
-                            Expanded(
-                                child: Text('Zuhr',
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(fontSize: 18))),
-                            Expanded(
-                                child: Text(adhaan.zuhr,
-                                    style: const TextStyle(fontSize: 18))),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(padding: EdgeInsets.all(40.0)),
-                            Expanded(
-                                child: Text('Asr',
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(fontSize: 18))),
-                            Expanded(
-                                child: Text(adhaan.asr,
-                                    style: const TextStyle(fontSize: 18))),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(padding: EdgeInsets.all(40.0)),
-                            Expanded(
-                                child: Text('Magrib',
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(fontSize: 18))),
-                            Expanded(
-                                child: Text(adhaan.magrib,
-                                    style: const TextStyle(fontSize: 18))),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(padding: EdgeInsets.all(40.0)),
-                            Expanded(
-                                child: Text('Isha',
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(fontSize: 18))),
-                            Expanded(
-                                child: Text(adhaan.isha,
-                                    style: const TextStyle(fontSize: 18))),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Padding(padding: EdgeInsets.all(40.0)),
-                            Expanded(
-                                child: Text('Sunrise',
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(fontSize: 18, color: Colors.white70))),
-                            Expanded(
-                                child: Text(adhaan.dawn,
-                                    style: const TextStyle(fontSize: 18))),
-                          ],
-                        ),
-                      ],
-                    ));
-                  }))),
-    );
+        ),
+      ],
+    ));
   }
 }
 
@@ -212,10 +210,9 @@ class DatabaseHelper {
     await copyDb(path);
   }
 
-  Future<Adhaan?> getAdhaanTimings() async {
-    var currentDate = new DateTime.now();
-    var day = currentDate.day.toString();
-    var month = currentDate.month.toString().padLeft(2, "0");
+  Future<Adhaan?> getAdhaanTimings(DateTime date) async {
+    var day = date.day.toString();
+    var month = date.month.toString().padLeft(2, "0");
     Database db = await instance.database;
     var adhaans =
         await db.query('adhaan', orderBy: 'date', where: 'date="$month-$day"');
