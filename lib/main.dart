@@ -90,8 +90,8 @@ class _AdhaanAppState extends State<HomePage> {
           var newDate = await showDatePicker(
               context: context,
               initialDate: date!,
-              firstDate: DateTime(2021),
-              lastDate: DateTime(2022));
+              firstDate: DateTime(2010),
+              lastDate: DateTime(2050));
           if (newDate != null) {
             setState(() {
               date = newDate;
@@ -111,7 +111,6 @@ class _AdhaanAppState extends State<HomePage> {
     }
 
     adhaan = snapshot.data!;
-    // return Text(adhaan.zuhr);
     return SingleChildScrollView(
         child: Column(
       children: <Widget>[
@@ -123,10 +122,10 @@ class _AdhaanAppState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               adhanEntry("Subh", "${adhaan!.subh} AM"),
-              adhanEntry("Fajr", "${adhaan!.dawn} AM"),
-              adhanEntry("Dhuhr", "${adhaan!.zuhr} PM"),
+              adhanEntry("Fajr", "${adhaan!.fajr} AM"),
+              adhanEntry("Dhuhr", "${adhaan!.dhuhr} PM"),
               adhanEntry("Asr", "${adhaan!.asr} PM"),
-              adhanEntry("Maghrib", "${adhaan!.magrib} PM"),
+              adhanEntry("Maghrib", "${adhaan!.maghrib} PM"),
               adhanEntry("Isha", "${adhaan!.isha} PM"),
             ],
           ),
@@ -137,41 +136,49 @@ class _AdhaanAppState extends State<HomePage> {
 }
 
 class Adhaan {
-  final String date;
+  final String location;
+  final int month;
+  final int day;
   final String subh;
-  final String dawn;
-  final String zuhr;
+  final String fajr;
+  final String dhuhr;
   final String asr;
-  final String magrib;
+  final String maghrib;
   final String isha;
 
   Adhaan(
-      {required this.date,
+      {required this.location,
+      required this.month,
+      required this.day,
       required this.subh,
-      required this.dawn,
-      required this.zuhr,
+      required this.fajr,
+      required this.dhuhr,
       required this.asr,
-      required this.magrib,
+      required this.maghrib,
       required this.isha});
 
   factory Adhaan.fromMap(Map<String, dynamic> json) => new Adhaan(
-        date: json['date'],
+        location: json['location'],
+        month: json['month'],
+        day: json['day'],
         subh: json['subh'],
-        dawn: json['dawn'],
-        zuhr: json['zuhr'],
+        fajr: json['fajr'],
+        dhuhr: json['dhuhr'],
         asr: json['asr'],
-        magrib: json['magrib'],
+        maghrib: json['maghrib'],
         isha: json['isha'],
       );
 
   Map<String, dynamic> toMap() {
     return {
-      'date': date,
+      'location': location,
+      'month': month,
+      'day': day,
       'subh': subh,
-      'dawn': dawn,
-      'zuhr': zuhr,
+      'fajr': fajr,
+      'dhuhr': dhuhr,
       'asr': asr,
-      'magrib': magrib,
+      'maghrib': maghrib,
       'isha': isha,
     };
   }
@@ -211,16 +218,17 @@ class DatabaseHelper {
   }
 
   Future<Adhaan?> getAdhaanTimings(DateTime date) async {
-    var day = date.day.toString();
-    var month = date.month.toString().padLeft(2, "0");
+    var day = date.day;
+    var month = date.month;
     Database db = await instance.database;
-    var adhaans =
-        await db.query('adhaan', orderBy: 'date', where: 'date="$month-$day"');
+    var adhaans = await db.query('adhaan', where: 'month=$month and day=$day');
     var adhaanList = [];
     if (adhaans.isNotEmpty) {
+      print(adhaans);
       adhaanList = adhaans.map((c) => Adhaan.fromMap(c)).toList();
     }
     if (adhaanList.isNotEmpty) {
+      print(adhaanList);
       return adhaanList[0];
     }
     return null;

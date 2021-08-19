@@ -1,6 +1,6 @@
 # Adhaan
 
-Application to know local [Adhaan](https://en.wikipedia.org/wiki/Adhan) time in Vengara.
+Application to know local [Adhaan](https://en.wikipedia.org/wiki/Adhan) time in Vengara, Malappuram.
 
 ## Data Source
 
