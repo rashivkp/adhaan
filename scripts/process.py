@@ -18,7 +18,7 @@ conn.commit()
 
 def process():
     os.system("pdftotext -layout {} {}".format(pdffilename, filename))
-    os.system("sed -e '/^$/d' -e 's/^ \+//' -e '/^[^0-9]/d' {filename} > 1{filename}".format(filename=filename))
+    os.system("sed -e '/^$/d' -e '/^ *[^0-9 ]\+/d' {filename} > 1{filename}".format(filename=filename))
 
     fp = open("1"+filename)
     counter = 0
@@ -33,7 +33,7 @@ def process():
 
 # split line into different months
 def process_line(line, section, day):
-    column_starts = [0, 55, 110]
+    column_starts = [5, 60, 115]
     column_length = 55
 
     for i in range(0, 3):

@@ -2,7 +2,7 @@
 generate sqlite db with Adhaan data for the given locationfile
 
 ## Requirements
-- pstotext
+- pdftotext
 
 ## Howto
 1. obtain pdf from http://musthafadarimikaripur.com/
